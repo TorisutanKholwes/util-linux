@@ -90,6 +90,7 @@ lib_blkid_sources = '''
   src/superblocks/refs.c
   src/superblocks/nvidia_raid.c
   src/superblocks/ocfs.c
+  src/superblocks/osvcfs.c
   src/superblocks/promise_raid.c
   src/superblocks/reiserfs.c
   src/superblocks/romfs.c
