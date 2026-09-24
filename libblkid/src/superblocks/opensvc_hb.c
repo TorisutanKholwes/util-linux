@@ -28,14 +28,11 @@ struct opensvc_hb_header {
 
 static int opensvc_hb_verify_csum(blkid_probe pr, const struct opensvc_hb_header *header)
 {
-	const unsigned char *data;
-	size_t data_len;
 	uint32_t checksum;
 
-	data = (const unsigned char *)header + sizeof(header->crc);
-	data_len = sizeof(struct opensvc_hb_header) - sizeof(header->crc);
-
-	checksum = crc32c(~0U, data, data_len);
+	checksum = ul_crc32c_exclude_offset(~0U, (const unsigned char *) header, sizeof(struct opensvc_hb_header),
+		offsetof(struct opensvc_hb_header, crc),
+		sizeof(header->crc));
 	checksum ^= ~0U;
 
 	return blkid_probe_verify_csum(pr, checksum, le32_to_cpu(header->crc));
@@ -62,7 +59,7 @@ static int probe_opensvc_hb(blkid_probe pr, const struct blkid_idmag *mag)
 
 	if (page_size < OPENSVC_HB_MIN_BLOCK_SIZE ||
 		page_size > OPENSVC_HB_MAX_BLOCK_SIZE ||
-		(page_size & (page_size - 1)) != 0)
+		!is_power_of_2(page_size))
 		return BLKID_PROBE_NONE;
 
 	blkid_probe_sprintf_version(pr, "%u", version);
